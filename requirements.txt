@@ -1,0 +1,3 @@
+Faker==13.11.1
+pymailtm==1.0.2
+pyppeteer==1.0.2
