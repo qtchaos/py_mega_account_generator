@@ -17,7 +17,7 @@ from pymailtm.pymailtm import CouldNotGetAccountException
 try:
     shutil.rmtree("tmp")
 except PermissionError:
-    print("Failed to clear temp files... Chrome already running?")
+    print("Failed to clear temp files... Chromium already running?")
     sys.exit(1)
 
 fake = Faker()
@@ -28,9 +28,8 @@ args = [
     '--window-position=0,0',
     '--ignore-certificate-errors',
     '--ignore-certificate-errors-spki-list',
-    '--user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6)'
-    ' AppleWebKit/537.36 (KHTML, like Gecko) '
-    'Chrome/65.0.3312.0 Safari/537.36" '
+    '--user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+    'Chrome/95.0.4638.69 Safari/537.36" '
 ]
 
 
@@ -72,9 +71,10 @@ async def register(credentials):
         "userDataDir": "./tmp",
         "args": args,
         "autoClose": False,
-        "ignoreDefaultArgs": ['--enable-automation']
+        "ignoreDefaultArgs": ['--enable-automation', '--disable-extensions']
     })
-    page = await browser.newPage()
+    context = await browser.createIncognitoBrowserContext()
+    page = await context.newPage()
     await page.goto("https://mega.nz/register")
     await page.waitForSelector('#register_form')
     await page.type('#register-firstname-registerpage2', firstname)
@@ -85,7 +85,7 @@ async def register(credentials):
     await asyncio.sleep(1.5)  # Wait for confirm email.
     message = mail.get_messages()[0]
     confirm_link = (re.findall(r"(https?:[^ ]*)", str(message))[0]).replace("Best", "")[:-4]
-    confirm_page = await browser.newPage()
+    confirm_page = await context.newPage()
     await confirm_page.goto(confirm_link)
     confirm_field = "#login-password2"
     await confirm_page.waitForSelector(confirm_field)
@@ -97,6 +97,7 @@ async def register(credentials):
     await asyncio.sleep(0.5)
     await browser.close()
     print("Verified mega.nz account.")
+    print(f"Email: {credentials['email']}\nPassword: {credentials['password']}")
     await save_credentials(credentials)
     return True
 
