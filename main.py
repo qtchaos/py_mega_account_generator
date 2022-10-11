@@ -3,6 +3,7 @@ Generates a verified mega.nz account.
 """
 import asyncio
 import json
+import os
 import random
 import re
 import shutil
@@ -14,11 +15,12 @@ import pyppeteer
 from faker import Faker
 from pymailtm.pymailtm import CouldNotGetAccountException
 
-try:
-    shutil.rmtree("tmp")
-except PermissionError:
-    print("Failed to clear temp files... Chromium already running?")
-    sys.exit(1)
+if os.path.exists('tmp'):
+    try:
+        shutil.rmtree("tmp")
+    except PermissionError:
+        print("Failed to clear temp files... Chromium already running?")
+        sys.exit(1)
 
 fake = Faker()
 args = [
@@ -60,7 +62,7 @@ async def generate_mail():
     return credentials
 
 
-async def register(credentials):
+async def register(internal, credentials):
     """Registers and verifies mega.nz account."""
     name = str(fake.name()).split(" ", 2)
     firstname = name[0]
@@ -97,18 +99,21 @@ async def register(credentials):
     await asyncio.sleep(0.5)
     await browser.close()
     print("Verified mega.nz account.")
-    print(f"Email: {credentials['email']}\nPassword: {credentials['password']}")
-    await save_credentials(credentials)
-    return True
+    if not internal:
+        print(f"Email: {credentials['email']}\nPassword: {credentials['password']}")
+        await save_credentials(credentials)
+    return credentials
 
 
 async def save_credentials(credentials):
     """Pass credentials into a file."""
-    file = open(f"credentials/{credentials['email'][:-4]}.json", "w", encoding="UTF-8")
-    del credentials["id"]
-    json_file = json.dumps(credentials)
-    file.write(json_file)
-    file.close()
+    if not os.path.exists("credentials"):
+        os.mkdir("credentials")
+    with open(f"credentials/{credentials['email'][:-4]}.json", "w", encoding="UTF-8") as file:
+        del credentials["id"]
+        json_file = json.dumps(credentials)
+        file.write(json_file)
+        file.close()
 
 
 async def mail_login(credentials):
@@ -139,4 +144,4 @@ async def type_password(page, credentials):
     print("Registered account successfully.")
 
 
-asyncio.run(register(asyncio.run(generate_mail())))
+asyncio.run(register(False, asyncio.run(generate_mail())))
