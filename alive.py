@@ -8,7 +8,7 @@ from utilites.etc import p_print, Colours
 mega = Mega()
 
 def keepalive(verbose: bool):
-    """Keep the generated acocunts alive by logging in."""
+    """Keep the generated accounts alive by logging in."""
     
     files = os.listdir("./credentials")
     if len(files) == 0:

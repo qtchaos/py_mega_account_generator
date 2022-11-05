@@ -2,3 +2,4 @@ Faker>=13.11.1
 pymailtm>=1.0.2
 pyppeteer>=1.0.2
 psutil>=5.9.3
+mega.py>=1.0.8
