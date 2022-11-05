@@ -3,7 +3,10 @@ Generates a verified mega.nz account.
 """
 import asyncio
 import pyppeteer
+import argparse
 
+
+from alive import keepalive # pylint: disable=E0611
 from utilites.etc import p_print, clear_console, Colours, clear_tmp
 from utilites.web import generate_mail, type_name, type_password, initial_setup, save_credentials, mail_login, get_mail
 
@@ -18,6 +21,13 @@ args = [
     '--user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
     'Chrome/95.0.4638.69 Safari/537.36" ',
 ]
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-ka' ,'--keepalive', required=False, action='store_true',
+                    help='Logs into the accounts to keep them alive.')
+parser.add_argument('-v', '--verbose', required=False, action='store_true',
+                    help='Shows storage left while using keepalive function.')
+console_args = parser.parse_args()
 
 
 async def register(credentials):
@@ -56,5 +66,9 @@ async def register(credentials):
 
 if __name__ == "__main__":
     clear_console()
-    clear_tmp()
-    asyncio.run(register(asyncio.run(generate_mail())))
+
+    if console_args.keepalive:
+        keepalive(console_args.verbose)
+    else:
+        clear_tmp()
+        asyncio.run(register(asyncio.run(generate_mail())))

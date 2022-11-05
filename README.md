@@ -4,7 +4,8 @@ Unofficial Python port of crachkub-dev's [mega-account-generator](https://github
 
 Simple script for generating mega.nz accounts.
 
-Instructions:  
+## Instructions
+
 **This assumes you have [Git](https://git-scm.com/) and [Python](https://www.python.org/) installed.**
 
 ```
@@ -13,5 +14,10 @@ cd py_mega_account_generator
 pip install -r requirements.txt
 python main.py
 ```
+
+## Arguments
+
+`-v, --verbose` | Shows storage left while using keepalive function.
+`-ka, --keepalive` | Logs into the accounts to keep them alive.
 
 ###### ~~Probably spaghetti code, but~~ it works!
