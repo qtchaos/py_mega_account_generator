@@ -18,6 +18,8 @@ python main.py
 ## Arguments
 
 `-v, --verbose` | Shows storage left while using keepalive function.\
-`-ka, --keepalive` | Logs into the accounts to keep them alive.
+`-ka, --keepalive` | Logs into the accounts to keep them alive.\
+`-f, --file` | Uploads a file to the generated account.\
+`-p, --public` | Generates a shareable link to the file.
 
 ###### ~~Probably spaghetti code, but~~ it works!

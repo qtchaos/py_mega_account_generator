@@ -2,11 +2,12 @@
 Generates a verified mega.nz account.
 """
 import asyncio
-import pyppeteer
 import argparse
+import os
+import pyppeteer
 
-
-from alive import keepalive # pylint: disable=E0611
+from services.alive import keepalive # pylint: disable=E0611
+from services.upload import upload_file
 from utilites.etc import p_print, clear_console, Colours, clear_tmp
 from utilites.web import generate_mail, type_name, type_password, initial_setup, save_credentials, mail_login, get_mail
 
@@ -27,6 +28,10 @@ parser.add_argument('-ka' ,'--keepalive', required=False, action='store_true',
                     help='Logs into the accounts to keep them alive.')
 parser.add_argument('-v', '--verbose', required=False, action='store_true',
                     help='Shows storage left while using keepalive function.')
+parser.add_argument('-f', '--file', required=False, help='Uploads a file to the account.')
+parser.add_argument('-p', '--public', required=False, action='store_true',
+                    help='Generates a public link to the uploaded file, use with -u')
+
 console_args = parser.parse_args()
 
 
@@ -62,6 +67,12 @@ async def register(credentials):
     )
 
     await save_credentials(credentials)
+
+    if console_args.file is not None:
+        if os.path.exists(console_args.file):
+            upload_file(console_args.public, console_args.file, credentials)
+        else:
+            p_print("File not found.", Colours.FAIL)
 
 
 if __name__ == "__main__":
