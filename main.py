@@ -30,7 +30,7 @@ parser.add_argument('-v', '--verbose', required=False, action='store_true',
                     help='Shows storage left while using keepalive function.')
 parser.add_argument('-f', '--file', required=False, help='Uploads a file to the account.')
 parser.add_argument('-p', '--public', required=False, action='store_true',
-                    help='Generates a public link to the uploaded file, use with -u')
+                    help='Generates a public link to the uploaded file, use with -f')
 
 console_args = parser.parse_args()
 
