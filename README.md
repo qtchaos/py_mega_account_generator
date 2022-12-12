@@ -6,7 +6,7 @@ Simple script for generating mega.nz accounts.
 
 ## Instructions
 
-**This assumes you have [Git](https://git-scm.com/) and [Python](https://www.python.org/) installed.**
+**This assumes you have [Git](https://git-scm.com/) and [Python](https://www.python.org/) (>= 3.10) installed.**
 
 ```
 git clone https://github.com/qtchaos/py_mega_account_generator.git
