@@ -2,15 +2,10 @@
 import os
 import json
 
-try:
-    from mega import Mega # pylint: disable=E0401
-    from mega.errors import RequestError
-except AttributeError:
-    print("Please use Python 3.10 or lower, see the issue below for details.")
-    print("https://github.com/qtchaos/py_mega_account_generator/issues/4")
-    exit(1)
+from mega import Mega
+from mega.errors import RequestError
 
-from utilites.etc import p_print, Colours
+from utilities.etc import p_print, Colours
 
 mega = Mega()
 

@@ -1,15 +1,22 @@
-"""
-Generates a verified mega.nz account.
-"""
+"""Main file for the project, handles the arguments and calls the other files."""
 import asyncio
 import argparse
 import os
+import sys
 import pyppeteer
+
+from utilities.etc import p_print, clear_console, Colours, clear_tmp, reinstall_tenacity
+
+# Spooky import to check if the correct version of tenacity is installed.
+if sys.version_info.major == 3 and sys.version_info.minor <= 11:
+    try:
+        from mega import Mega
+    except AttributeError:
+        reinstall_tenacity()
 
 from services.alive import keepalive # pylint: disable=E0611
 from services.upload import upload_file
-from utilites.etc import p_print, clear_console, Colours, clear_tmp
-from utilites.web import generate_mail, type_name, type_password, initial_setup, save_credentials, mail_login, get_mail
+from utilities.web import generate_mail, type_name, type_password, initial_setup, save_credentials, mail_login, get_mail
 
 
 args = [
@@ -73,6 +80,7 @@ async def register(credentials):
             upload_file(console_args.public, console_args.file, credentials)
         else:
             p_print("File not found.", Colours.FAIL)
+    exit(0)
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ from faker import Faker
 
 from pymailtm.pymailtm import CouldNotGetAccountException
 
-from utilites.etc import p_print, Colours
+from utilities.etc import p_print, Colours
 
 fake = Faker()
 

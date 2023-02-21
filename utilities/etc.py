@@ -9,7 +9,6 @@ import psutil
 @dataclass
 class Colours:
     """Colours for the console."""
-    # pylint: disable=invalid-name
     HEADER: str = "\033[95m"
     OKBLUE: str = "\033[94m"
     OKCYAN: str = "\033[96m"
@@ -35,6 +34,22 @@ def clear_tmp():
 
             clear_tmp()
 
+
+def reinstall_tenacity():
+    """Reinstalls tenacity because of a dependency problem within the mega.py library."""
+    try:
+        p_print("Reinstalling tenacity...", Colours.WARNING)
+        os.system("pip uninstall tenacity -y")
+        os.system("pip install tenacity")
+        clear_console()
+        p_print("Reinstalled tenacity successfully!", Colours.OKGREEN)
+        p_print("Please rerun the program.", Colours.WARNING)
+        # os.execl(sys.executable, "./main.py", *sys.argv)
+        exit(0)
+    except Exception as e:
+        p_print("Failed to reinstall tenacity!", Colours.FAIL)
+        print(e)
+        exit(1)
 
 def kill_process(matches: list):
     """Kills processes."""
