@@ -3,3 +3,4 @@ credentials
 .idea
 venv
 __pycache__
+config.json

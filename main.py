@@ -14,7 +14,7 @@ if sys.version_info.major == 3 and sys.version_info.minor <= 11:
     except AttributeError:
         reinstall_tenacity()
 
-from services.alive import keepalive # pylint: disable=E0611
+from services.alive import keepalive  # pylint: disable=E0611
 from services.upload import upload_file
 from utilities.web import generate_mail, type_name, type_password, initial_setup, save_credentials, mail_login, get_mail
 
@@ -26,16 +26,16 @@ args = [
     "--window-position=0,0",
     "--ignore-certificate-errors",
     "--ignore-certificate-errors-spki-list",
-    '--user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-    'Chrome/95.0.4638.69 Safari/537.36" ',
+    '--user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/117.0"',
 ]
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-ka' ,'--keepalive', required=False, action='store_true',
+parser.add_argument('-ka', '--keepalive', required=False, action='store_true',
                     help='Logs into the accounts to keep them alive.')
 parser.add_argument('-v', '--verbose', required=False, action='store_true',
                     help='Shows storage left while using keepalive function.')
-parser.add_argument('-f', '--file', required=False, help='Uploads a file to the account.')
+parser.add_argument('-f', '--file', required=False,
+                    help='Uploads a file to the account.')
 parser.add_argument('-p', '--public', required=False, action='store_true',
                     help='Generates a public link to the uploaded file, use with -f')
 
@@ -44,11 +44,29 @@ console_args = parser.parse_args()
 
 async def register(credentials):
     """Registers and verifies mega.nz account."""
+    chrome_exec = "C:/Program Files/Google/Chrome/Application/chrome.exe"
+    if os.path.exists("config.json"):
+        with open("config.json", "r", encoding="utf-8") as f:
+            chrome_exec = f.read().split('"')[3]
+    if not os.path.exists(chrome_exec):
+        p_print(
+            "Failed to find Google Chrome. Please make sure you have Google Chrome installed.", Colours.FAIL)
+        chrome_exec = input(
+            "Please enter the path to the Google Chrome executable: ")
+        if os.path.exists(chrome_exec):
+            p_print("Found Google Chrome executable!", Colours.OKGREEN)
+            with open("config.json", "w", encoding="utf-8") as f:
+                f.write('{"executablePath": "' + chrome_exec + '"}')
+        else:
+            p_print("Failed to find Google Chrome executable!", Colours.FAIL)
+            exit(1)
+
     browser = await pyppeteer.launch({
         "headless": True,
         "ignoreHTTPSErrors": True,
         "userDataDir": "./tmp",
         "args": args,
+        "executablePath": chrome_exec,
         "autoClose": False,
         "ignoreDefaultArgs": ["--enable-automation", "--disable-extensions"],
     })
