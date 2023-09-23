@@ -19,6 +19,14 @@ from services.upload import upload_file
 from utilities.web import generate_mail, type_name, type_password, initial_setup, save_credentials, mail_login, get_mail
 
 
+chromium_exec = ""
+default_installs = [
+    "C:/Program Files/Google/Chrome/Application/chrome.exe",
+    "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
+    "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe",
+    "C:/Program Files (x86)/BraveSoftware/Brave-Browser/Application/brave.exe",
+    "C:/Program Files/Microsoft/Edge/Application/msedge.exe",
+]
 args = [
     "--no-sandbox",
     "--disable-setuid-sandbox",
@@ -44,29 +52,12 @@ console_args = parser.parse_args()
 
 async def register(credentials):
     """Registers and verifies mega.nz account."""
-    chrome_exec = "C:/Program Files/Google/Chrome/Application/chrome.exe"
-    if os.path.exists("config.json"):
-        with open("config.json", "r", encoding="utf-8") as f:
-            chrome_exec = f.read().split('"')[3]
-    if not os.path.exists(chrome_exec):
-        p_print(
-            "Failed to find Google Chrome. Please make sure you have Google Chrome installed.", Colours.FAIL)
-        chrome_exec = input(
-            "Please enter the path to the Google Chrome executable: ")
-        if os.path.exists(chrome_exec):
-            p_print("Found Google Chrome executable!", Colours.OKGREEN)
-            with open("config.json", "w", encoding="utf-8") as f:
-                f.write('{"executablePath": "' + chrome_exec + '"}')
-        else:
-            p_print("Failed to find Google Chrome executable!", Colours.FAIL)
-            exit(1)
-
     browser = await pyppeteer.launch({
         "headless": True,
         "ignoreHTTPSErrors": True,
         "userDataDir": "./tmp",
         "args": args,
-        "executablePath": chrome_exec,
+        "executablePath": chromium_exec,
         "autoClose": False,
         "ignoreDefaultArgs": ["--enable-automation", "--disable-extensions"],
     })
@@ -103,6 +94,33 @@ async def register(credentials):
 
 if __name__ == "__main__":
     clear_console()
+
+    if os.path.exists("config.json"):
+        with open("config.json", "r", encoding="utf-8") as f:
+            tmp = f.read().split('"')[3]
+            if os.path.exists(tmp):
+                chromium_exec = tmp
+    else:
+        # Check default_installs for a Chromium based browser. (Windows paths only for now)
+        # since I don't have a Linux machine to test on.
+        for i in default_installs:
+            if os.path.exists(i):
+                chromium_exec = i
+                break
+
+    # If no Chromium based browser is found, ask the user for the path to one.
+    if not chromium_exec:
+        p_print(
+            "Failed to find a Chromium based browser. Please make sure you have one installed.", Colours.FAIL)
+        chromium_exec = input(
+            "Please enter the path to a Chromium based browser's executable: ")
+        if os.path.exists(chromium_exec):
+            p_print("Found executable!", Colours.OKGREEN)
+            with open("config.json", "w", encoding="utf-8") as f:
+                f.write('{"executablePath": "' + chromium_exec + '"}')
+        else:
+            p_print("Failed to find executable!", Colours.FAIL)
+            exit(1)
 
     if console_args.keepalive:
         keepalive(console_args.verbose)
