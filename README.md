@@ -1,8 +1,6 @@
 # py_mega_account_generator
 
-Unofficial Python port of crachkub-dev's [mega-account-generator](https://github.com/crackhub-dev/mega-account-generator) with added features.
-
-Simple script for generating mega.nz accounts.
+Generate mega.nz accounts with a single command, upload files, get shareable links and do all of the above with looping to generate as many accounts and upload a file as many times as you want.
 
 ## Instructions
 
@@ -20,6 +18,5 @@ python main.py
 `-v, --verbose` | Shows storage left while using keepalive function.\
 `-ka, --keepalive` | Logs into the accounts to keep them alive.\
 `-f filename, --file filename` | Uploads a file to the generated account.\
-`-p, --public` | Generates a shareable link to the file.
-
-###### ~~Probably spaghetti code, but~~ it works!
+`-p, --public` | Generates a shareable link to the file. \
+`-l int, --loop int` | Loops the script x amount of times.
