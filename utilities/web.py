@@ -8,7 +8,7 @@ import random
 import pymailtm
 from faker import Faker
 
-from pymailtm.pymailtm import CouldNotGetAccountException
+from pymailtm.pymailtm import CouldNotGetAccountException, CouldNotGetMessagesException
 
 from utilities.etc import p_print, Colours
 
@@ -22,8 +22,7 @@ def get_random_string(length):
     numbers = string.digits
     alphabet = lower_letters + upper_letters + numbers
 
-    result_str = "".join(random.choice(alphabet) for _ in range(length))
-    return result_str
+    return "".join(random.choice(alphabet) for _ in range(length))
 
 
 async def initial_setup(context, message, credentials):
@@ -73,7 +72,7 @@ async def get_mail(mail):
             message = mail.get_messages()[0]
             p_print("Found mail!", Colours.OKGREEN)
             return message
-        except IndexError:
+        except (IndexError, CouldNotGetMessagesException):
             p_print("Failed to find mail... trying again in 1.5 seconds.",
                     Colours.WARNING)
             await asyncio.sleep(1.5)
@@ -113,10 +112,9 @@ async def generate_mail():
             break
         except CouldNotGetAccountException:
             p_print("Retrying mail.tm account generation...", Colours.WARNING)
-    credentials = {
+    return {
         "email": account.address,
         "emailPassword": account.password,
         "password": get_random_string(14),
         "id": account.id_,
     }
-    return credentials
