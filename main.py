@@ -86,7 +86,7 @@ async def register(credentials):
     await save_credentials(credentials)
 
     if console_args.file is not None:
-        if os.path.exists(console_args.file):
+        if os.path.exists(console_args.file) and 0 < os.path.getsize(console_args.file) < 2e+10:
             upload_file(console_args.public, console_args.file, credentials)
         else:
             p_print("File not found.", Colours.FAIL)
@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
     if console_args.keepalive:
         keepalive(console_args.verbose)
-    elif console_args.loop > 1:
+    elif console_args.loop is not None and console_args.loop > 1:
         for _ in range(console_args.loop):
             p_print(f"Loop {_ + 1}/{console_args.loop}", Colours.OKGREEN)
             clear_tmp()
