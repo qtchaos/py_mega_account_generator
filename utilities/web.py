@@ -1,5 +1,7 @@
 """All functions related to the browser"""
+
 import asyncio
+import contextlib
 import re
 import os
 import json
@@ -27,8 +29,8 @@ def get_random_string(length):
 
 async def initial_setup(context, message, credentials):
     """Initial setup for the account."""
-    confirm_link = (re.findall(r"(https?:[^ ]*)",
-                               str(message))[0]).replace("Best", "")[:-4]
+    confirm_link = (re.findall(
+        r'(?:href=")(https:\/\/mega\.nz\/#confirm[^ ][^"]*)', str(message))[0])
 
     confirm_page = await context.newPage()
     await confirm_page.goto(confirm_link)
@@ -37,8 +39,9 @@ async def initial_setup(context, message, credentials):
     await confirm_page.click(confirm_field)
     await confirm_page.type(confirm_field, credentials["password"])
     await confirm_page.click(".login-button")
-    await confirm_page.waitForSelector("#freeStart")
-    await confirm_page.click("#freeStart")
+    with contextlib.suppress(TimeoutError):
+        await confirm_page.waitForSelector("#freeStart", timeout=1000)
+        await confirm_page.click("#freeStart")
 
 
 async def save_credentials(credentials):
