@@ -5,7 +5,7 @@ import os
 import sys
 import pyppeteer
 
-from utilities.etc import p_print, clear_console, Colours, clear_tmp, reinstall_tenacity
+from utilities.etc import p_print, clear_console, Colours, clear_tmp, reinstall_tenacity, check_for_updates
 
 # Spooky import to check if the correct version of tenacity is installed.
 if sys.version_info.major == 3 and sys.version_info.minor <= 11:
@@ -17,7 +17,6 @@ if sys.version_info.major == 3 and sys.version_info.minor <= 11:
 from services.alive import keepalive  # pylint: disable=E0611
 from services.upload import upload_file
 from utilities.web import generate_mail, type_name, type_password, initial_setup, save_credentials, mail_login, get_mail
-
 
 chromium_exec = ""
 default_installs = [
@@ -46,6 +45,8 @@ parser.add_argument('-f', '--file', required=False,
                     help='Uploads a file to the account.')
 parser.add_argument('-p', '--public', required=False, action='store_true',
                     help='Generates a public link to the uploaded file, use with -f')
+parser.add_argument('-l', '--loop', required=False,
+                    help="Loops the program for a specified amount of times.", type=int)
 
 console_args = parser.parse_args()
 
@@ -89,11 +90,13 @@ async def register(credentials):
             upload_file(console_args.public, console_args.file, credentials)
         else:
             p_print("File not found.", Colours.FAIL)
-    exit(0)
+    if console_args.loop is None or console_args.loop <= 1:
+        exit(0)
 
 
 if __name__ == "__main__":
     clear_console()
+    check_for_updates()
 
     if os.path.exists("config.json"):
         with open("config.json", "r", encoding="utf-8") as f:
@@ -124,6 +127,11 @@ if __name__ == "__main__":
 
     if console_args.keepalive:
         keepalive(console_args.verbose)
+    elif console_args.loop > 1:
+        for _ in range(console_args.loop):
+            p_print(f"Loop {_ + 1}/{console_args.loop}", Colours.OKGREEN)
+            clear_tmp()
+            asyncio.run(register(asyncio.run(generate_mail())))
     else:
         clear_tmp()
         asyncio.run(register(asyncio.run(generate_mail())))

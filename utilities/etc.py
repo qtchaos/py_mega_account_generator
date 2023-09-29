@@ -1,9 +1,13 @@
 """All functions NOT related to the browser"""
 import os
 import shutil
+import urllib
+import json
 from dataclasses import dataclass
 
 import psutil
+
+VERSION = "1.2.0"
 
 
 @dataclass
@@ -20,19 +24,29 @@ class Colours:
 
 def clear_tmp():
     """Clears tmp folder."""
-    matches = ["CrashpadMetrics-active.pma",
-               "CrashpadMetrics.pma"]
 
     if os.path.exists("tmp"):
         try:
             shutil.rmtree("tmp")
             p_print("Cleared tmp folder successfully!", Colours.OKGREEN)
         except PermissionError:
+            matches = ["CrashpadMetrics-active.pma",
+                       "CrashpadMetrics.pma"]
             p_print(
                 "Failed to clear temporary files... killing previous instances.", Colours.FAIL)
             kill_process(matches)
 
             clear_tmp()
+
+
+def check_for_updates():
+    request = urllib.request.urlopen(
+        'https://api.github.com/repos/qtchaos/py_mega_account_generator/tags')
+    json_data = json.loads(request.read().decode())
+    latest_version = json_data[0]['name']
+    if latest_version != VERSION:
+        p_print(
+            f"New version available! Please download it from https://github.com/qtchaos/py_mega_account_generator/releases/tag/{latest_version}", Colours.WARNING)
 
 
 def reinstall_tenacity():
@@ -44,12 +58,12 @@ def reinstall_tenacity():
         clear_console()
         p_print("Reinstalled tenacity successfully!", Colours.OKGREEN)
         p_print("Please rerun the program.", Colours.WARNING)
-        # os.execl(sys.executable, "./main.py", *sys.argv)
         exit(0)
     except Exception as e:
         p_print("Failed to reinstall tenacity!", Colours.FAIL)
         print(e)
         exit(1)
+
 
 def kill_process(matches: list):
     """Kills processes."""
