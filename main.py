@@ -5,7 +5,7 @@ import os
 import sys
 import pyppeteer
 
-from utilities.etc import p_print, clear_console, Colours, clear_tmp, reinstall_tenacity, check_for_updates
+from utilities.etc import p_print, clear_console, Colours, clear_tmp, reinstall_tenacity, check_for_updates, delete_default
 
 # Spooky import to check if the correct version of tenacity is installed.
 if sys.version_info.major == 3 and sys.version_info.minor <= 11:
@@ -83,6 +83,7 @@ async def register(credentials):
         Colours.OKCYAN,
     )
 
+    delete_default(credentials)
     await save_credentials(credentials)
 
     if console_args.file is not None:
@@ -91,7 +92,7 @@ async def register(credentials):
         else:
             p_print("File not found.", Colours.FAIL)
     if console_args.loop is None or console_args.loop <= 1:
-        exit(0)
+        sys.exit(0)
 
 
 if __name__ == "__main__":
@@ -123,7 +124,7 @@ if __name__ == "__main__":
                 f.write('{"executablePath": "' + chromium_exec + '"}')
         else:
             p_print("Failed to find executable!", Colours.FAIL)
-            exit(1)
+            sys.exit(1)
 
     if console_args.keepalive:
         keepalive(console_args.verbose)

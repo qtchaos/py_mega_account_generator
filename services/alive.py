@@ -9,12 +9,14 @@ from utilities.etc import p_print, Colours
 
 mega = Mega()
 
+
 def keepalive(verbose: bool):
     """Keep the generated accounts alive by logging in."""
-    
+
     files = os.listdir("./credentials")
     if len(files) == 0:
-        p_print("No credentials found, please remove all arguments and try again.", Colours.FAIL)
+        p_print(
+            "No credentials found, please remove all arguments and try again.", Colours.FAIL)
         return
 
     i = 0
@@ -26,10 +28,12 @@ def keepalive(verbose: bool):
                 try:
                     mega.login(credentials["email"], credentials["password"])
                     storage_left = mega.get_quota() / 1024
-                    p_print(f"{i}/{len(files)} Successfully logged into {credentials['email']}", Colours.OKGREEN)
+                    p_print(
+                        f"{i}/{len(files)} Successfully logged into {credentials['email']}", Colours.OKGREEN)
                     if verbose:
-                        p_print(f"    {storage_left}GB of storage left", Colours.OKGREEN)
+                        p_print(
+                            f"    {storage_left}GB of storage left", Colours.OKGREEN)
                 except RequestError:
-                    p_print(f"{i}/{len(files)} Failed to login to {credentials['email']}", Colours.FAIL)
+                    p_print(
+                        f"{i}/{len(files)} Failed to login to {credentials['email']}", Colours.FAIL)
                     continue
-                

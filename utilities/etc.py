@@ -4,10 +4,12 @@ import shutil
 import urllib
 import json
 from dataclasses import dataclass
-
+from mega import Mega
 import psutil
+import sys
 
 VERSION = "v1.2.0"
+mega = Mega()
 
 
 @dataclass
@@ -49,20 +51,29 @@ def check_for_updates():
             f"New version available! Please download it from https://github.com/qtchaos/py_mega_account_generator/releases/tag/{latest_version}", Colours.WARNING)
 
 
-def reinstall_tenacity():
+def delete_default(credentials: dict):
+    """Deletes the default welcome file."""
+
+    mega.login(credentials["email"], credentials["password"])
+    mega.destroy(mega.find(filename="Welcome to MEGA.pdf")[0])
+    p_print("Deleted welcome file.", Colours.OKGREEN)
+    return
+
+
+def reinstall_tenacity():  # sourcery skip: extract-method
     """Reinstalls tenacity because of a dependency problem within the mega.py library."""
     try:
         p_print("Reinstalling tenacity...", Colours.WARNING)
-        os.system("pip uninstall tenacity -y")
-        os.system("pip install tenacity")
+        os.system("pip3 uninstall tenacity -y")
+        os.system("pip3 install tenacity")
         clear_console()
         p_print("Reinstalled tenacity successfully!", Colours.OKGREEN)
         p_print("Please rerun the program.", Colours.WARNING)
-        exit(0)
+        sys.exit(0)
     except Exception as e:
         p_print("Failed to reinstall tenacity!", Colours.FAIL)
         print(e)
-        exit(1)
+        sys.exit(1)
 
 
 def kill_process(matches: list):
