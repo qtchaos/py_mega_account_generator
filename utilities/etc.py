@@ -8,7 +8,7 @@ from mega import Mega
 import psutil
 import sys
 
-VERSION = "v1.2.0"
+VERSION = "v1.3.0"
 mega = Mega()
 
 
@@ -64,8 +64,8 @@ def reinstall_tenacity():  # sourcery skip: extract-method
     """Reinstalls tenacity because of a dependency problem within the mega.py library."""
     try:
         p_print("Reinstalling tenacity...", Colours.WARNING)
-        os.system("pip3 uninstall tenacity -y")
-        os.system("pip3 install tenacity")
+        os.system("python -m pip uninstall tenacity -y")
+        os.system("python -m pip install tenacity")
         clear_console()
         p_print("Reinstalled tenacity successfully!", Colours.OKGREEN)
         p_print("Please rerun the program.", Colours.WARNING)
