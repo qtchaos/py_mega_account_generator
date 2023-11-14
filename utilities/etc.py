@@ -8,9 +8,9 @@ from mega import Mega
 import psutil
 import sys
 
-VERSION = "v1.3.0"
+VERSION = "v1.4.0"
 mega = Mega()
-
+clear_attempts = 0
 
 @dataclass
 class Colours:
@@ -26,7 +26,7 @@ class Colours:
 
 def clear_tmp():
     """Clears tmp folder."""
-
+    global clear_attempts
     if os.path.exists("tmp"):
         try:
             shutil.rmtree("tmp")
@@ -37,7 +37,9 @@ def clear_tmp():
             p_print(
                 "Failed to clear temporary files... killing previous instances.", Colours.FAIL)
             kill_process(matches)
-
+            if clear_attempts >= 1:
+                return False
+            clear_attempts += 1
             clear_tmp()
 
 
@@ -53,11 +55,8 @@ def check_for_updates():
 
 def delete_default(credentials: dict):
     """Deletes the default welcome file."""
-
     mega.login(credentials["email"], credentials["password"])
     mega.destroy(mega.find(filename="Welcome to MEGA.pdf")[0])
-    p_print("Deleted welcome file.", Colours.OKGREEN)
-    return
 
 
 def reinstall_tenacity():  # sourcery skip: extract-method

@@ -56,7 +56,7 @@ async def register(credentials):
     browser = await pyppeteer.launch({
         "headless": True,
         "ignoreHTTPSErrors": True,
-        "userDataDir": "./tmp",
+        "userDataDir": f"{os.getcwd()}/tmp",
         "args": args,
         "executablePath": chromium_exec,
         "autoClose": False,
