@@ -39,10 +39,11 @@ async def initial_setup(context, message, credentials):
     await confirm_page.click(confirm_field)
     await confirm_page.type(confirm_field, credentials["password"])
     await confirm_page.click(".login-button")
-    with contextlib.suppress(TimeoutError):
+    try:
         await confirm_page.waitForSelector("#freeStart", timeout=1000)
         await confirm_page.click("#freeStart")
-
+    except TimeoutError:
+        pass
 
 async def save_credentials(credentials):
     """Pass credentials into a file."""
