@@ -8,7 +8,7 @@ from mega import Mega
 import psutil
 import sys
 
-VERSION = "v1.4.0"
+VERSION = "v1.4.1"
 mega = Mega()
 clear_attempts = 0
 
