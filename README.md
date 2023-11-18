@@ -4,7 +4,7 @@ Generate MEGA accounts with a single command, upload files, get shareable links 
 
 ## Instructions
 
-These instructions assume you have [Git](https://git-scm.com/) and [Python](https://www.python.org/) installed, if you do not have Git installed, then download the project from [here](https://github.com/qtchaos/py_mega_account_generator/archive/refs/heads/master.zip)
+These instructions assume you have [Git](https://git-scm.com/) and [Python **3.10**](https://www.python.org/) installed, if you do not have Git installed, then download the project from [here](https://github.com/qtchaos/py_mega_account_generator/archive/refs/heads/master.zip) and skip the first step below.
 
 ```
 git clone https://github.com/qtchaos/py_mega_account_generator.git
