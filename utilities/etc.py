@@ -1,61 +1,53 @@
 """All functions NOT related to the browser"""
 import os
 import shutil
-import urllib
 import json
-from dataclasses import dataclass
+from urllib.request import urlopen
+import sys
 from mega import Mega
 import psutil
-import sys
 
-VERSION = "v1.4.1"
+from utilities.types import Colours, Credentials, Config
+
+VERSION = "v1.5.0"
 mega = Mega()
-clear_attempts = 0
-
-@dataclass
-class Colours:
-    """Colours for the console."""
-    HEADER: str = "\033[95m"
-    OKBLUE: str = "\033[94m"
-    OKCYAN: str = "\033[96m"
-    OKGREEN: str = "\033[92m"
-    WARNING: str = "\033[93m"
-    FAIL: str = "\033[91m"
-    ENDC: str = "\033[0m"
 
 
-def clear_tmp():
-    """Clears tmp folder."""
-    global clear_attempts
-    if os.path.exists("tmp"):
-        try:
-            shutil.rmtree("tmp")
-            p_print("Cleared tmp folder successfully!", Colours.OKGREEN)
-        except PermissionError:
-            matches = ["CrashpadMetrics-active.pma",
-                       "CrashpadMetrics.pma"]
-            p_print(
-                "Failed to clear temporary files... killing previous instances.", Colours.FAIL)
-            kill_process(matches)
-            if clear_attempts >= 1:
-                return False
-            clear_attempts += 1
-            clear_tmp()
+def clear_tmp() -> bool:
+    """
+    Clears tmp folder."""
+    max_attempts = 1
+
+    for _ in range(max_attempts):
+        if os.path.exists("tmp"):
+            try:
+                shutil.rmtree("tmp")
+                return True
+            except PermissionError:
+                matches = ["CrashpadMetrics-active.pma", "CrashpadMetrics.pma"]
+                kill_process(matches)
+
+    # If we've reached this point, all attempts have failed
+    return False
 
 
 def check_for_updates():
-    request = urllib.request.urlopen(
-        'https://api.github.com/repos/qtchaos/py_mega_account_generator/tags')
-    json_data = json.loads(request.read().decode())
-    latest_version = json_data[0]['name']
-    if latest_version != VERSION:
+    """Checks for updates via latest release tag."""
+    with urlopen('https://api.github.com/repos/qtchaos/py_mega_account_generator/tags') as request:
+        json_data = json.loads(request.read().decode())
+        latest_version = json_data[0]['name']
+        if latest_version == VERSION:
+            return False
+
         p_print(
-            f"New version available! Please download it from https://github.com/qtchaos/py_mega_account_generator/releases/tag/{latest_version}", Colours.WARNING)
+            f"New version available! Please download it from https://github.com/qtchaos/py_mega_account_generator/releases/tag/{latest_version}",
+            Colours.WARNING)
+    return True
 
 
-def delete_default(credentials: dict):
+def delete_default(credentials: Credentials):
     """Deletes the default welcome file."""
-    mega.login(credentials["email"], credentials["password"])
+    mega.login(credentials.email, credentials.password)
     mega.destroy(mega.find(filename="Welcome to MEGA.pdf")[0])
 
 
@@ -92,13 +84,10 @@ def kill_process(matches: list):
 
 def p_print(
     text,
-    colour=None,
+    colour,
 ):
     """Prints text in colour."""
-    if colour is not None:
-        print(colour + text + Colours.ENDC)
-    else:
-        print(text)
+    print(colour + text + Colours.ENDC)
 
 
 def clear_console():

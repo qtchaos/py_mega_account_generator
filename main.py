@@ -3,9 +3,14 @@ import asyncio
 import argparse
 import os
 import sys
+from typing import Tuple
 import pyppeteer
 
-from utilities.etc import p_print, clear_console, Colours, clear_tmp, reinstall_tenacity, check_for_updates, delete_default
+from services.alive import keepalive
+from services.upload import upload_file
+from utilities.fs import Config, concrete_read_config, read_config, write_config, write_default_config, save_credentials
+from utilities.web import generate_mail, type_name, type_password, initial_setup, mail_login, get_mail
+from utilities.etc import Credentials, p_print, clear_console, Colours, clear_tmp, reinstall_tenacity, check_for_updates, delete_default
 
 # Spooky import to check if the correct version of tenacity is installed.
 if sys.version_info.major == 3 and sys.version_info.minor <= 11:
@@ -14,11 +19,6 @@ if sys.version_info.major == 3 and sys.version_info.minor <= 11:
     except AttributeError:
         reinstall_tenacity()
 
-from services.alive import keepalive  # pylint: disable=E0611
-from services.upload import upload_file
-from utilities.web import generate_mail, type_name, type_password, initial_setup, save_credentials, mail_login, get_mail
-
-chromium_exec = ""
 default_installs = [
     "C:/Program Files/Google/Chrome/Application/chrome.exe",
     "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
@@ -51,14 +51,52 @@ parser.add_argument('-l', '--loop', required=False,
 console_args = parser.parse_args()
 
 
-async def register(credentials):
+def setup() -> Tuple[str, Config]:
+    """Sets up the configs so everything runs smoothly."""
+
+    executable_path = ""
+    config = read_config()
+
+    if config is None:
+        write_default_config()
+        config = concrete_read_config()
+    else:
+        executable_path = config.executablePath
+
+    # If no Chromium based browser is found, ask the user for the path to one.
+    if not executable_path:
+        p_print(
+            "Failed to find a Chromium based browser. Please make sure you have one installed.", Colours.FAIL)
+        executable_path = input(
+            "Please enter the path to a Chromium based browser's executable: ")
+        if os.path.exists(executable_path):
+            p_print("Found executable!", Colours.OKGREEN)
+            write_config("executablePath", executable_path, config)
+        else:
+            p_print("Failed to find executable!", Colours.FAIL)
+            sys.exit(1)
+
+    return executable_path, config
+
+
+def loop_registrations(loop_count: int, executable_path: str, config: Config):
+    """Registers accounts in a loop."""
+    for _ in range(loop_count):
+        p_print(f"Loop {_ + 1}/{loop_count}", Colours.OKGREEN)
+        clear_tmp()
+
+        credentials = asyncio.run(generate_mail())
+        asyncio.run(register(credentials, executable_path, config))
+
+
+async def register(credentials: Credentials, executable_path: str, config: Config):
     """Registers and verifies mega.nz account."""
     browser = await pyppeteer.launch({
         "headless": True,
         "ignoreHTTPSErrors": True,
         "userDataDir": f"{os.getcwd()}/tmp",
         "args": args,
-        "executablePath": chromium_exec,
+        "executablePath": executable_path,
         "autoClose": False,
         "ignoreDefaultArgs": ["--enable-automation", "--disable-extensions"],
     })
@@ -79,15 +117,18 @@ async def register(credentials):
 
     p_print("Verified account.", Colours.OKGREEN)
     p_print(
-        f"Email: {credentials['email']}\nPassword: {credentials['password']}",
+        f"Email: {credentials.email}\nPassword: {credentials.password}",
         Colours.OKCYAN,
     )
 
     delete_default(credentials)
-    await save_credentials(credentials)
+    save_credentials(credentials, config.accountFormat)
 
     if console_args.file is not None:
-        if os.path.exists(console_args.file) and 0 < os.path.getsize(console_args.file) < 2e+10:
+        file_size = os.path.getsize(console_args.file)
+        if os.path.exists(console_args.file) and 0 < file_size < 2e+10:
+            if file_size >= 5e+9:
+                p_print("File is larger than 5GB, mega.nz limits traffic to 5GB per IP.", Colours.WARNING)
             upload_file(console_args.public, console_args.file, credentials)
         else:
             p_print("File not found.", Colours.FAIL)
@@ -99,40 +140,16 @@ if __name__ == "__main__":
     clear_console()
     check_for_updates()
 
-    if os.path.exists("config.json"):
-        with open("config.json", "r", encoding="utf-8") as f:
-            tmp = f.read().split('"')[3]
-            if os.path.exists(tmp):
-                chromium_exec = tmp
-    else:
-        # Check default_installs for a Chromium based browser. (Windows paths only for now)
-        # since I don't have a Linux machine to test on.
-        for i in default_installs:
-            if os.path.exists(i):
-                chromium_exec = i
-                break
-
-    # If no Chromium based browser is found, ask the user for the path to one.
-    if not chromium_exec:
-        p_print(
-            "Failed to find a Chromium based browser. Please make sure you have one installed.", Colours.FAIL)
-        chromium_exec = input(
-            "Please enter the path to a Chromium based browser's executable: ")
-        if os.path.exists(chromium_exec):
-            p_print("Found executable!", Colours.OKGREEN)
-            with open("config.json", "w", encoding="utf-8") as f:
-                f.write('{"executablePath": "' + chromium_exec + '"}')
-        else:
-            p_print("Failed to find executable!", Colours.FAIL)
-            sys.exit(1)
+    executable_path, config = setup()
+    if not executable_path:
+        p_print("Failed while setting up!", Colours.FAIL)
+        sys.exit(1)
 
     if console_args.keepalive:
         keepalive(console_args.verbose)
     elif console_args.loop is not None and console_args.loop > 1:
-        for _ in range(console_args.loop):
-            p_print(f"Loop {_ + 1}/{console_args.loop}", Colours.OKGREEN)
-            clear_tmp()
-            asyncio.run(register(asyncio.run(generate_mail())))
+        loop_registrations(console_args.loop, executable_path, config)
     else:
         clear_tmp()
-        asyncio.run(register(asyncio.run(generate_mail())))
+        credentials = asyncio.run(generate_mail())
+        asyncio.run(register(credentials, executable_path, config))

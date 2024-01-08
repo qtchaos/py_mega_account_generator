@@ -28,6 +28,20 @@ If you want to upload a file though, you can use the following setup: `python ma
 The `emailPassword` represents the password used to create the [mail.tm](https://mail.tm) account.\
 If you want to login to the MEGA account later on, you have to use the `email` and `password` fields.
 
+### Custom format
+If you want to change the format of the credentials file, you can do so by changing the `accountFormat` variable in the `config.json` file.
+Use the following variables to change the format:
+- `{email}` - The email used to create the MEGA account.
+- `{emailPassword}` - The password used to create the mail.tm account.
+- `{password}` - The password used to create the MEGA account.
+
+For example, if you want to change the format to the following:
+```
+example@example.com#password
+```
+Then you would change the `accountFormat` variable to `{email}#{password}`, this will append credentials to a file called `accounts.txt` in the credentials folder.
+If you change the `accountFormat` variable to `""`, then it will use the default JSON file format and create a new file for every account.
+
 ## Arguments
 > [!WARNING]  
 > Do not use the arguments in the **Services** section together with the file upload arguments.
