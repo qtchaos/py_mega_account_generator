@@ -33,22 +33,34 @@ def clear_tmp() -> bool:
 
 def check_for_updates():
     """Checks for updates via latest release tag."""
-    with urlopen('https://api.github.com/repos/qtchaos/py_mega_account_generator/tags') as request:
+    with urlopen(
+        "https://api.github.com/repos/qtchaos/py_mega_account_generator/tags"
+    ) as request:
         json_data = json.loads(request.read().decode())
-        latest_version = json_data[0]['name']
+        latest_version = json_data[0]["name"]
         if latest_version == VERSION:
             return False
 
         p_print(
             f"New version available! Please download it from https://github.com/qtchaos/py_mega_account_generator/releases/tag/{latest_version}",
-            Colours.WARNING)
+            Colours.WARNING,
+        )
     return True
 
 
 def delete_default(credentials: Credentials):
-    """Deletes the default welcome file."""
+    """Deletes any .pdf files."""
     mega.login(credentials.email, credentials.password)
-    mega.destroy(mega.find(filename="Welcome to MEGA.pdf")[0])
+    file_list = mega.get_files()
+
+    # destroy first pdf found
+    for file_id, file_info in file_list.items():
+        if file_info["a"]["n"].endswith(".pdf"):
+            mega.destroy(file_id)
+            p_print(f"Deleted {file_info['a']['n']}", Colours.OKGREEN)
+            break
+    else:
+        p_print("No PDF files found to delete.", Colours.WARNING)
 
 
 def reinstall_tenacity():  # sourcery skip: extract-method
@@ -73,8 +85,7 @@ def kill_process(matches: list):
         try:
             for _ in process.open_files():
                 if any(x in _.path for x in matches):
-                    p_print(
-                        f"Killing process {process.name()}...", Colours.WARNING)
+                    p_print(f"Killing process {process.name()}...", Colours.WARNING)
                     process.kill()
         except psutil.AccessDenied:
             continue
