@@ -16,7 +16,9 @@ def keepalive(verbose: bool):
     files = os.listdir("./credentials")
     if len(files) == 0:
         p_print(
-            "No credentials found, please remove all arguments and try again.", Colours.FAIL)
+            "No credentials found, please remove all arguments and try again.",
+            Colours.FAIL,
+        )
         return
 
     i = 0
@@ -26,14 +28,20 @@ def keepalive(verbose: bool):
                 credentials = json.JSONDecoder().decode(f.read())
                 i += 1
                 try:
-                    mega.login(credentials.email, credentials.password)
+                    mega.login(credentials["email"], credentials["password"])
+
                     storage_left = mega.get_quota() / 1024
                     p_print(
-                        f"{i}/{len(files)} Successfully logged into {credentials['email']}", Colours.OKGREEN)
+                        f"{i}/{len(files)} Successfully logged into {credentials['email']}",
+                        Colours.OKGREEN,
+                    )
                     if verbose:
                         p_print(
-                            f"    {storage_left}GB of storage left", Colours.OKGREEN)
+                            f"    {storage_left}GB of storage left", Colours.OKGREEN
+                        )
                 except RequestError:
                     p_print(
-                        f"{i}/{len(files)} Failed to login to {credentials['email']}", Colours.FAIL)
+                        f"{i}/{len(files)} Failed to login to {credentials['email']}",
+                        Colours.FAIL,
+                    )
                     continue
