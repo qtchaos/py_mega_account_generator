@@ -2,6 +2,6 @@
 	"python.analysis.typeCheckingMode": "basic",
 	"python.analysis.autoImportCompletions": true,
 	"editor.defaultFormatter": "ms-python.autopep8",
-	"editor.formatOnSave": true,
+	"editor.formatOnSave": false,
 	"editor.formatOnPaste": true
 }
