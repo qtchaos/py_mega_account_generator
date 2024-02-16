@@ -26,7 +26,7 @@ def keepalive(verbose: bool):
                 credentials = json.JSONDecoder().decode(f.read())
                 i += 1
                 try:
-                    mega.login(credentials.email, credentials.password)
+                    mega.login(credentials.get("email"), credentials.get("password"))
                     storage_left = mega.get_quota() / 1024
                     p_print(
                         f"{i}/{len(files)} Successfully logged into {credentials['email']}", Colours.OKGREEN)
