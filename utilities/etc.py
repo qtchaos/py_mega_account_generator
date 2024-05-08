@@ -14,8 +14,7 @@ mega = Mega()
 
 
 def clear_tmp() -> bool:
-    """
-    Clears tmp folder."""
+    """Clears tmp folder."""
     max_attempts = 1
 
     for _ in range(max_attempts):
@@ -48,8 +47,9 @@ def check_for_updates():
 def delete_default(credentials: Credentials):
     """Deletes the default welcome file."""
     mega.login(credentials.email, credentials.password)
-    mega.destroy(mega.find(filename="Welcome to MEGA.pdf")[0])
-
+    pdf = mega.get_files_in_node(2)
+    key = list(pdf.keys())[0]
+    mega.destroy(key)
 
 def reinstall_tenacity():  # sourcery skip: extract-method
     """Reinstalls tenacity because of a dependency problem within the mega.py library."""
