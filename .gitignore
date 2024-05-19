@@ -2,5 +2,7 @@ tmp
 credentials
 .idea
 venv
+.venv
 __pycache__
 config.json
+credentials.txt

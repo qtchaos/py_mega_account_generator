@@ -8,6 +8,7 @@ import pyppeteer
 
 from services.alive import keepalive
 from services.upload import upload_file
+from services.extract import extract_credentials
 from utilities.fs import Config, concrete_read_config, read_config, write_config, write_default_config, save_credentials
 from utilities.web import generate_mail, type_name, type_password, initial_setup, mail_login, get_mail
 from utilities.etc import Credentials, p_print, clear_console, Colours, clear_tmp, reinstall_tenacity, check_for_updates, delete_default
@@ -33,12 +34,13 @@ args = [
     "--window-position=0,0",
     "--ignore-certificate-errors",
     "--ignore-certificate-errors-spki-list",
-    '--user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/117.0"',
+    '--user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0"',
 ]
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-ka', '--keepalive', required=False, action='store_true',
                     help='Logs into the accounts to keep them alive.')
+parser.add_argument('-e', '--extract', required=False, action='store_true', help='Extracts the credentials to a file.')
 parser.add_argument('-v', '--verbose', required=False, action='store_true',
                     help='Shows storage left while using keepalive function.')
 parser.add_argument('-f', '--file', required=False,
@@ -145,7 +147,9 @@ if __name__ == "__main__":
         p_print("Failed while setting up!", Colours.FAIL)
         sys.exit(1)
 
-    if console_args.keepalive:
+    if console_args.extract:
+        extract_credentials(config.accountFormat)
+    elif console_args.keepalive:
         keepalive(console_args.verbose)
     elif console_args.loop is not None and console_args.loop > 1:
         loop_registrations(console_args.loop, executable_path, config)

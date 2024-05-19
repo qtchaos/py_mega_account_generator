@@ -52,5 +52,6 @@ If you change the `accountFormat` variable to `""`, then it will use the default
 
 ### Services
 
+`-e, --extract` | Compiles all credentials outputted as .json to a single file given the custom format.\
 `-ka, --keepalive` | Logs into the accounts to keep them alive.\
 `-v, --verbose` | Shows storage left while using keepalive function.
