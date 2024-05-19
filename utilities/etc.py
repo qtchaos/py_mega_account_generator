@@ -9,7 +9,7 @@ import psutil
 
 from utilities.types import Colours, Credentials, Config
 
-VERSION = "v1.5.0"
+VERSION = "v1.5.1"
 mega = Mega()
 
 
