@@ -41,7 +41,7 @@ async def initial_setup(context, message, credentials):
     await confirm_page.type(confirm_field, credentials.password)
     await confirm_page.click(".login-button")
     try:
-        await confirm_page.waitForSelector("#freeStart", timeout=10000)
+        await confirm_page.waitForSelector("#freeStart", timeout=30000)
         await confirm_page.click("#freeStart")
     except TimeoutError:
         pass
