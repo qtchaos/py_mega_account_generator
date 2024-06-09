@@ -7,6 +7,7 @@ import sys
 
 from utilities.etc import p_print
 from utilities.types import Colours, Credentials, Config
+from typing import Union
 
 CONFIG_FILE = "config.json"
 
