@@ -9,6 +9,5 @@ credentials.txt
 .ruff_cache
 .mypy_cache
 brave.exe
-125.1.66.115
 credentials.json
 chromedriver.exe
