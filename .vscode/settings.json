@@ -1,7 +1,7 @@
 {
-	"editor.formatOnSave": false,
+	"editor.formatOnSave": true,
 	"editor.formatOnPaste": true,
 	"[python]": {
-		"editor.defaultFormatter": "ms-python.black-formatter"
+		"editor.defaultFormatter": "charliermarsh.ruff"
 	}
 }
