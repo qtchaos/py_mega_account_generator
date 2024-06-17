@@ -8,3 +8,6 @@ config.json
 credentials.txt
 .ruff_cache
 .mypy_cache
+brave.exe
+credentials.json
+chromedriver.exe

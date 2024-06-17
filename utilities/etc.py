@@ -7,6 +7,7 @@ from urllib.request import urlopen
 import sys
 from mega import Mega
 import psutil
+import getpass
 
 from utilities.types import Colours, Credentials
 
@@ -70,6 +71,23 @@ def reinstall_tenacity():  # sourcery skip: extract-method
 		p_print("Failed to reinstall tenacity!", Colours.FAIL)
 		print(e)
 		sys.exit(1)
+
+
+def get_matching_password():
+	"""
+	Prompts the user to enter and confirm a password.
+	Returns the password if both inputs match.
+	Prompts again if the passwords don't match.
+	"""
+	while True:
+		password = getpass.getpass("Enter password to encrypt credentials: ")
+		password_2 = getpass.getpass("Re-enter password to confirm credentials: ")
+
+		if password == password_2:
+			print("Passwords match.")
+			return password
+		else:
+			print("Passwords do not match. Please try again.")
 
 
 def kill_process(matches: list):

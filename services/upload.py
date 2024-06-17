@@ -17,3 +17,4 @@ def upload_file(public: bool, file: str, credentials: Credentials):
 	if public:
 		link = mega.get_upload_link(uploaded_file)
 		p_print(f"Shareable link: {link}", Colours.OKGREEN)
+		return str(link)
