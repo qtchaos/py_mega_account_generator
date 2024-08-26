@@ -4,11 +4,12 @@ import asyncio
 import re
 import string
 import random
-import sys
 import pymailtm
 from faker import Faker
 
 from pymailtm.pymailtm import CouldNotGetAccountException, CouldNotGetMessagesException
+import pyppeteer
+import pyppeteer.page
 
 from utilities.etc import Credentials, p_print, Colours
 
@@ -63,10 +64,6 @@ async def get_mail(mail):
 	attempts = 0
 
 	while True:
-		if attempts >= 10:
-			p_print("Failed to find mail... exiting.", Colours.FAIL)
-			sys.exit(1)
-
 		try:
 			message = mail.get_messages()[0]
 			p_print("Found mail!", Colours.OKGREEN)
@@ -79,41 +76,48 @@ async def get_mail(mail):
 			await asyncio.sleep(1.5)
 
 
-async def type_name(page, credentials: Credentials):
+async def type_name(page: pyppeteer.page.Page, credentials: Credentials):
 	"""Types name into the name fields."""
 	name = str(fake.name()).split(" ", 2)
 	firstname = name[0]
 	lastname = name[1]
 	await page.goto("https://mega.nz/register")
 	await page.waitForSelector("#register_form")
-	await page.type("#register-firstname-registerpage2", firstname)
-	await page.type("#register-lastname-registerpage2", lastname)
-	await page.type("#register-email-registerpage2", credentials.email)
+	await page.evaluate(
+		f"const textInputs = document.querySelectorAll('input[type=text]'); textInputs[2].value = '{firstname}'; textInputs[3].value = '{lastname}'; textInputs[4].value = '{credentials.email}';"
+	)
 
 
-async def type_password(page, credentials: Credentials):
-	"""Types passwords into the password fields."""
-	await page.click("#register-password-registerpage2")
-	await page.type("#register-password-registerpage2", credentials.password)
-	await page.click("#register-password-registerpage3")
-	await page.type("#register-password-registerpage3", credentials.password)
+async def finish_form(page: pyppeteer.page.Page, credentials: Credentials):
+	"""Checks the boxes for the register page."""
 	await page.click("#register-check-registerpage2")
+	await page.click(".register-button")
+
+
+async def type_password(page: pyppeteer.page.Page, credentials: Credentials):
+	"""Types passwords into the password fields."""
+	await page.evaluate(
+		f"const passwordInputs = document.querySelectorAll('input[type=password]'); passwordInputs[0].value = '{credentials.password}'; passwordInputs[1].value = '{credentials.password}';"
+	)
 	await page.querySelectorAllEval(
 		".understand-check", "(elements) => {elements[0].click();}"
 	)
-	await page.click(".register-button")
 	p_print("Registered account successfully!", Colours.OKGREEN)
 
 
 async def generate_mail() -> Credentials:
 	"""Generate mail.tm account and return account credentials."""
 	mail = pymailtm.MailTm()
+	try_count = 0
+
 	while True:
 		try:
 			account = mail.get_account()
 			break
 		except CouldNotGetAccountException:
 			p_print("Retrying mail.tm account generation...", Colours.WARNING)
+			try_count += 1
+			await asyncio.sleep(try_count)
 
 	credentials = Credentials()
 	credentials.email = account.address

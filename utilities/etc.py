@@ -10,7 +10,7 @@ import psutil
 
 from utilities.types import Colours, Credentials
 
-VERSION = "v1.5.1"
+VERSION = "v1.5.2"
 mega = Mega()
 
 
@@ -80,7 +80,7 @@ def kill_process(matches: list):
 				if any(x in _.path for x in matches):
 					p_print(f"Killing process {process.name()}...", Colours.WARNING)
 					process.kill()
-		except psutil.AccessDenied:
+		except (psutil.AccessDenied, psutil.NoSuchProcess):
 			continue
 
 	p_print("Killed previous instances successfully!", Colours.OKGREEN)

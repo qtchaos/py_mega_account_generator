@@ -19,6 +19,7 @@ from utilities.fs import (
 	save_credentials,
 )
 from utilities.web import (
+	finish_form,
 	generate_mail,
 	type_name,
 	type_password,
@@ -154,7 +155,7 @@ async def register(credentials: Credentials, executable_path: str, config: Confi
 			"userDataDir": f"{os.getcwd()}/tmp",
 			"args": args,
 			"executablePath": executable_path,
-			"autoClose": False,
+			"autoClose": False,  # We run into runtime errors if we use autoClose
 			"ignoreDefaultArgs": ["--enable-automation", "--disable-extensions"],
 		}
 	)
@@ -164,6 +165,7 @@ async def register(credentials: Credentials, executable_path: str, config: Confi
 
 	await type_name(page, credentials)
 	await type_password(page, credentials)
+	await finish_form(page, credentials)
 	mail = await mail_login(credentials)
 
 	await asyncio.sleep(1.5)
