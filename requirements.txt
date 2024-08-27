@@ -3,3 +3,5 @@ pymailtm>=1.0.2
 pyppeteer>=1.0.2
 psutil>=5.9.3
 mega.py>=1.0.8
+cryptography>=42.0.8
+tinydb>=4.8.0
