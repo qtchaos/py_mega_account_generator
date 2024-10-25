@@ -6,7 +6,9 @@ import os
 import sys
 from typing import Tuple
 import pyppeteer
-
+import json
+import re
+import shutil
 from services.alive import keepalive
 from services.upload import upload_file
 from services.extract import extract_credentials
@@ -101,6 +103,13 @@ parser.add_argument(
 	help="Loops the program for a specified amount of times.",
 	type=int,
 )
+parser.add_argument(
+	"-c",
+	"--convert",
+	required=False,
+	action="store_true",
+	help="Converts accounts.txt from credentials folder to individual JSON files",
+)
 
 console_args = parser.parse_args()
 
@@ -134,6 +143,71 @@ def setup() -> Tuple[str, Config]:
 			sys.exit(1)
 
 	return executable_path, config
+
+
+def archive_folder(folder_path: str) -> str:
+	"""
+	Archives a folder and returns path to the archive
+	"""
+	if not os.path.isdir(folder_path):
+		return folder_path
+
+	archive_path = folder_path.rstrip("/\\") + ".zip"
+	shutil.make_archive(folder_path, "zip", folder_path)
+	return archive_path
+
+
+def convert_accounts():
+	"""
+	Converts accounts.txt from credentials folder to individual JSON files
+	"""
+
+	def parse_account(account_text):
+		email_match = re.search(r"Email: (.+)", account_text)
+		email_pass_match = re.search(r"Email Password: (.+)", account_text)
+		mega_pass_match = re.search(r"Mega Password: (.+)", account_text)
+
+		if not all([email_match, email_pass_match, mega_pass_match]):
+			return None
+
+		return {
+			"email": email_match.group(1),
+			"emailPassword": email_pass_match.group(1),
+			"password": mega_pass_match.group(1),
+		}
+
+	base_dir = os.path.dirname(os.path.abspath(__file__))
+	input_path = os.path.join(base_dir, "credentials", "accounts.txt")
+	output_dir = os.path.dirname(input_path)
+
+	if not os.path.exists(input_path):
+		p_print("accounts.txt not found in credentials folder!", Colours.FAIL)
+		return
+
+	with open(input_path, "r", encoding="utf-8") as f:
+		content = f.read()
+
+	accounts = content.split("-------------------")
+	converted = 0
+
+	for account in accounts:
+		if not account.strip():
+			continue
+
+		account_data = parse_account(account.strip())
+		if account_data:
+			email = account_data["email"]
+			filename = f"{email.split('@')[0]}@{email.split('@')[1].split('.')[0]}.json"
+			output_path = os.path.join(output_dir, filename)
+
+			with open(output_path, "w", encoding="utf-8") as f:
+				json.dump(account_data, f, indent=2)
+			converted += 1
+
+	p_print(
+		f"Successfully converted {converted} accounts to JSON format.", Colours.OKGREEN
+	)
+	p_print(f"JSON files saved in: {output_dir}", Colours.OKCYAN)
 
 
 def loop_registrations(loop_count: int, executable_path: str, config: Config):
@@ -203,6 +277,10 @@ if __name__ == "__main__":
 	clear_console()
 	check_for_updates()
 
+	if console_args.convert:
+		convert_accounts()
+		sys.exit(0)
+
 	executable_path, config = setup()
 	if not executable_path:
 		p_print("Failed while setting up!", Colours.FAIL)
@@ -217,4 +295,10 @@ if __name__ == "__main__":
 	else:
 		clear_tmp()
 		credentials = asyncio.run(generate_mail())
+
+		if console_args.file:
+			if os.path.isdir(console_args.file):
+				console_args.file = archive_folder(console_args.file)
+				p_print(f"Folder archived to: {console_args.file}", Colours.OKCYAN)
+
 		asyncio.run(register(credentials, executable_path, config))
